@@ -1,0 +1,13 @@
+[Unit]
+Description=Pagure server service
+After=network.target
+
+[Service]
+Type=simple
+User=__APP__
+Group=__APP__
+WorkingDirectory=__FINALPATH__
+ExecStart=__FINALPATH__/pagure/runworker.py --debug & __FINALPATH__/pagure/runserver.py --debug
+
+[Install]
+WantedBy=multi-user.target

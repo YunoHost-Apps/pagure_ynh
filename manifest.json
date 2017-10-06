@@ -1,0 +1,59 @@
+{
+	"name": "Pagure",
+	"id": "pagure",
+	"packaging_format": 1,
+	"requirements": {
+		"yunohost": ">= 2.7.0"
+	},
+	"description": {
+		"en": "A translation platform using Git and Python"
+	},
+	"version": "3.8.0",
+	"url": "https://pagure.io/pagure",
+	"license": "AGPL-3.0",
+	"maintainer": {
+		"name": "Jean-Baptiste Holcroft",
+		"email": "jean-baptiste@holcroft.fr"
+	},
+	"multi_instance": true,
+	"services": [
+		"nginx"
+	],
+	"arguments": {
+		"install" : [
+			{
+				"name": "domain",
+				"type": "domain",
+				"ask": {
+					"en": "Choose a domain for Pagure:"
+				},
+				"example": "domain.org"
+			},
+			{
+				"name": "path",
+				"type": "path",
+				"ask": {
+				    "en": "Choose a path for Pagure:"
+				},
+				"example": "/pagure",
+				"default": "/pagure"
+			},
+			{
+				"name": "is_public",
+				"type": "boolean",
+				"ask": {
+					"en": "Should Pagure be publicly accessible?"
+				},
+				"default": "0"
+			},
+			{
+				"name": "admin",
+				"type": "user",
+				"ask": {
+				    "en": "Choose an admin user for Pagure"
+				},
+				"example": "simon"
+			}
+		]
+	}
+}
