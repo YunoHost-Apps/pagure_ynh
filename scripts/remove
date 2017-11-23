@@ -16,17 +16,20 @@ source /usr/share/yunohost/helpers
 app=$YNH_APP_INSTANCE_NAME
 
 db_name=$(ynh_app_setting_get "$app" db_name)
+db_name=$(ynh_app_setting_get "$app" domain)
 
 #=================================================
-# REMOVE SERVICE FROM ADMIN PANEL
+# REMOVE uwsgi and systemd files
 #=================================================
 
-if yunohost service status | grep -q "$app"
-then
-	echo "Remove $app service"
-	systemctl stop "$app.service"
-	yunohost service remove "$app.service"
-fi
+ynh_remove_uwsgi_service
+
+#=================================================
+# REMOVE THE PostgreSQL DATABASE
+#=================================================
+
+# Remove a database if it exists, along with the associated user
+ynh_psql_remove_db "$db_name" "$app"
 
 #=================================================
 # REMOVE DEPENDENCIES
@@ -43,17 +46,17 @@ ynh_remove_app_dependencies
 ynh_secure_remove "/var/www/$app"
 
 #=================================================
-# REMOVE LOGROTATE CONFIGURATION
+# REMOVE NGINX CONFIGURATION
 #=================================================
 
-# Remove the app-specific logrotate config
-ynh_remove_logrotate
+# Remove the dedicated nginx config
+ynh_remove_nginx_config
 
 #=================================================
-# SPECIFIC REMOVE
+# REMOVE uwsgi and systemd files
 #=================================================
 
-ynh_remove_systemd_config
+ynh_remove_uwsgi_service
 
 #=================================================
 # GENERIC FINALIZATION

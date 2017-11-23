@@ -73,7 +73,31 @@ ynh_app_setting_set "$app" final_path "$final_path"
 #=================================================
 
 ynh_install_app_dependencies git python-virtualenv libgit2-dev \
-                 libjpeg-dev gcc libffi-dev python-dev python-cffi
+                 libjpeg-dev gcc libffi-dev python-dev python-cffi \
+                 postgresql python-psycopg2 \
+                 uwsgi uwsgi-plugin-python
+
+#=================================================
+# CREATE A PostgreSQL DATABASE
+#=================================================
+
+ynh_psql_test_if_first_run
+
+db_name=$(ynh_sanitize_dbid "$app")
+db_pwd=$(ynh_string_random)
+# Initialize database and store postgres password for upgrade
+ynh_psql_create_db "$db_name" "$app" "$db_pwd"
+ynh_app_setting_set "$app" db_name "$db_name"
+ynh_app_setting_set "$app" db_pwd "$db_pwd"
+
+systemctl reload postgresql
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+
+# Create a dedicated nginx config
+ynh_add_nginx_config
 
 #=================================================
 # CREATE DEDICATED USER
@@ -84,13 +108,39 @@ ynh_system_user_create "$app" "${final_path}"
 #=================================================
 # SPECIFIC SETUP
 #=================================================
+# setup pagure.cfg
+#=================================================
+
+secret_key=$(ynh_string_random)
+salt_email=$(ynh_string_random)
+
+cp ../conf/pagure.cfg.sample "$final_path/pagure.cfg"
+ynh_replace_string "__SECRET_KEY__" "$secret_key" "$final_path/pagure.cfg"
+ynh_replace_string "__DB_USER__"    "$app"        "$final_path/pagure.cfg"
+ynh_replace_string "__DB_PWD__"     "$db_pwd"     "$final_path/pagure.cfg"
+ynh_replace_string "__DB_NAME__"    "$db_name"    "$final_path/pagure.cfg"
+ynh_replace_string "__DOMAIN__"     "$domain"     "$final_path/pagure.cfg"
+ynh_replace_string "__SALT_EMAIL__" "$salt_email" "$final_path/pagure.cfg"
+
+#=================================================
+# setup pagure.wsgi
+#=================================================
+
+cp ../conf/pagure.wsgi "$final_path/pagure.wsgi"
+ynh_replace_string "__FINALPATH__" "$final_path"   "$final_path/pagure.wsgi"
+
+#=================================================
+# setup uwsgi service
+#=================================================
+
+ynh_add_uwsgi_service
 
 #=================================================
 # Get Pagure source
 #=================================================
 
 ynh_setup_source "${final_path}"
-ln -s "${final_path}/pagure-3.8" "${final_path}/pagure"
+ln -s "${final_path}/pagure-3.10.1" "${final_path}/pagure"
 
 #=================================================
 # PIP INSTALLATION
@@ -101,13 +151,13 @@ virtualenv "${final_path}/venv"
 	set +eu
 	source "${final_path}/venv/bin/activate"
 	"${final_path}/venv/bin/pip" install cffi
-	"${final_path}/venv/bin/pip" install pygit2==0.21
+	"${final_path}/venv/bin/pip" install pygit2==0.24
 	"${final_path}/venv/bin/pip" install -r "${final_path}/pagure/requirements.txt"
+	"${final_path}/venv/bin/pip" install psycopg2
 )
 
 #=================================================
 # SPECIFIC SETUP Filling up the database
-# https://docs.weblate.org/en/latest/admin/install.html#filling-up-the-database
 #==========================================
 
 # Create the folder that will receive the projects, forks, docs, requests and tickets' git repo:
@@ -117,17 +167,8 @@ mkdir -p "${final_path}/lcl/{repos,docs,forks,tickets,requests,remotes,attachmen
 	set +eu
 	source "${final_path}/venv/bin/activate"
 	cd "${final_path}/pagure"
-	python createdb.py
+	PAGURE_CONFIG=${final_path}/pagure.cfg python createdb.py
 )
-
-#=================================================
-# Set-up a service
-#=================================================
-# TODO: add port support for service
-# server_port=$(ynh_find_port 8080)
-# ynh_app_setting_set "$app" port "$server_port"
-
-ynh_add_systemd_config
 
 #=================================================
 # GENERIC FINALIZATION
@@ -137,13 +178,6 @@ ynh_add_systemd_config
 
 # Set permissions to app files
 chown -R "$app": "$final_path"
-
-#=================================================
-# SETUP LOGROTATE
-#=================================================
-
-# Use logrotate to manage application logfile(s)
-ynh_use_logrotate
 
 #=================================================
 # SETUP SSOWAT
@@ -164,5 +198,4 @@ fi
 # RELOAD NGINX
 #=================================================
 
-systemctl start "$app.service"
 systemctl reload nginx
