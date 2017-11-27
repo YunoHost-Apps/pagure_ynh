@@ -140,7 +140,7 @@ ynh_add_uwsgi_service
 #=================================================
 
 ynh_setup_source "${final_path}"
-ln -s "${final_path}/pagure-3.10.1" "${final_path}/pagure"
+ln -s "${final_path}/pagure-3.11" "${final_path}/pagure"
 
 #=================================================
 # PIP INSTALLATION
@@ -161,7 +161,7 @@ virtualenv "${final_path}/venv"
 #==========================================
 
 # Create the folder that will receive the projects, forks, docs, requests and tickets' git repo:
-mkdir -p "${final_path}/lcl/{repos,docs,forks,tickets,requests,remotes,attachments,releases}"
+mkdir -p "${final_path}"/lcl/{repos,docs,forks,tickets,requests,remotes,attachments,releases}
 
 (
 	set +eu

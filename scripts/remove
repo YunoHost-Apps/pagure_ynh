@@ -16,7 +16,7 @@ source /usr/share/yunohost/helpers
 app=$YNH_APP_INSTANCE_NAME
 
 db_name=$(ynh_app_setting_get "$app" db_name)
-db_name=$(ynh_app_setting_get "$app" domain)
+domain=$(ynh_app_setting_get "$app" domain)
 
 #=================================================
 # REMOVE uwsgi and systemd files
