@@ -140,7 +140,7 @@ ynh_add_uwsgi_service
 #=================================================
 
 ynh_setup_source "${final_path}"
-ln -s "${final_path}/pagure-3.11" "${final_path}/pagure"
+ln -s "${final_path}/pagure-3.13.2" "${final_path}/pagure"
 
 #=================================================
 # PIP INSTALLATION
@@ -148,12 +148,13 @@ ln -s "${final_path}/pagure-3.11" "${final_path}/pagure"
 virtualenv "${final_path}/venv"
 #run source in a 'sub shell'
 (
-	set +eu
+	set +o nounset
 	source "${final_path}/venv/bin/activate"
-	"${final_path}/venv/bin/pip" install cffi
-	"${final_path}/venv/bin/pip" install pygit2==0.24
-	"${final_path}/venv/bin/pip" install -r "${final_path}/pagure/requirements.txt"
-	"${final_path}/venv/bin/pip" install psycopg2
+	set -o nounset
+	pip install cffi
+	pip install pygit2==0.24
+	pip install -r "${final_path}/pagure/requirements.txt"
+	pip install psycopg2 cryptography py-bcrypt python-fedora
 )
 
 #=================================================
