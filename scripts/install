@@ -139,7 +139,7 @@ ynh_add_uwsgi_service
 # Get Pagure source
 #=================================================
 
-ynh_setup_source "${final_path}"
+ynh_setup_source_local "${final_path}"
 ln -s "${final_path}/pagure-3.13.2" "${final_path}/pagure"
 
 #=================================================
