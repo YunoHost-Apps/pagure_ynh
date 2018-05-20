@@ -17,6 +17,16 @@ app=$YNH_APP_INSTANCE_NAME
 
 db_name=$(ynh_app_setting_get "$app" db_name)
 domain=$(ynh_app_setting_get "$app" domain)
+redis_db=$(ynh_app_setting_get "$app" redis_db)
+
+#=================================================
+# STANDARD REMOVE
+#=================================================
+# STOP AND REMOVE SERVICE
+#=================================================
+
+# Remove the dedicated systemd config
+ynh_remove_systemd_config "$app-worker"
 
 #=================================================
 # REMOVE uwsgi and systemd files
@@ -30,6 +40,13 @@ ynh_remove_uwsgi_service
 
 # Remove a database if it exists, along with the associated user
 ynh_psql_remove_db "$db_name" "$app"
+
+#=================================================
+# REMOVE THE Redis DATABASE
+#=================================================
+
+# Remove a database if it exists, along with the associated user
+ynh_redis_remove_db "$redis_db"
 
 #=================================================
 # REMOVE DEPENDENCIES

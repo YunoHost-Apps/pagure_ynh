@@ -24,7 +24,7 @@ DB_URL = 'postgres://__DB_USER__:__DB_PWD__@localhost/__DB_NAME__'
 ADMIN_GROUP = ['sysadmin-main']
 
 ### Hard-coded list of global admins
-PAGURE_ADMIN_USERS = []
+PAGURE_ADMIN_USERS = ['__ADMIN__']
 
 ### The email address to which the flask.log will send the errors (tracebacks)
 EMAIL_ERROR = 'root@__DOMAIN__'
@@ -153,9 +153,9 @@ WEBHOOK = False
 ### Redis configuration
 # A redis server is required for both the Event-Source server or the web-hook
 # server.
-REDIS_HOST = '0.0.0.0'
+REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379
-REDIS_DB = 0
+REDIS_DB = __REDIS_DB__
 
 # Authentication related configuration option
 
