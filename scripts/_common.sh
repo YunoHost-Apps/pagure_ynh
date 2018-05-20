@@ -3,13 +3,7 @@
 ynh_check_global_uwsgi_config () {
 	uwsgi --version || ynh_die "You need to add uwsgi (and appropriate plugin) as a dependency"
 
-	if [ -f /etc/systemd/system/uwsgi-app@.service ];
-	then
-		echo "Uwsgi generic file is already installed"
-	else
-		cp ../conf/uwsgi-app@.socket /etc/systemd/system/uwsgi-app@.socket
-		cp ../conf/uwsgi-app@.service /etc/systemd/system/uwsgi-app@.service
-	fi
+	cp ../conf/uwsgi-app@.service /etc/systemd/system/uwsgi-app@.service
 
 	# make sure the folder for sockets exists and set authorizations
 	mkdir -p /var/run/uwsgi/
@@ -61,12 +55,12 @@ ynh_add_uwsgi_service () {
 	ynh_store_file_checksum "$finaluwsgiini"
 
 	chown root: "$finaluwsgiini"
-	systemctl enable "uwsgi-app@$app.socket"
-	systemctl start "uwsgi-app@$app.socket"
+
 	systemctl daemon-reload
+	systemctl enable "uwsgi-app@$app.service"
 
 	# Add as a service
-	yunohost service add "uwsgi-app@$app.socket" --log "/var/log/uwsgi/app/$app"
+	yunohost service add "uwsgi-app@$app.service" --log "/var/log/uwsgi/app/$app"
 }
 
 # Remove the dedicated uwsgi ini file
@@ -75,16 +69,14 @@ ynh_add_uwsgi_service () {
 ynh_remove_uwsgi_service () {
 	finaluwsgiini="/etc/uwsgi/apps-available/$app.ini"
 	if [ -e "$finaluwsgiini" ]; then
-		systemctl stop "uwsgi-app@$app.socket"
-		systemctl disable "uwsgi-app@$app.socket"
-		yunohost service remove "uwsgi-app@$app.socket"
+		systemctl stop "uwsgi-app@$app.service"
+		systemctl disable "uwsgi-app@$app.service"
+		yunohost service remove "uwsgi-app@$app.service"
 
 		ynh_secure_remove "$finaluwsgiini"
-		ynh_secure_remove "/var/run/uwsgi/$app.socket"
 		ynh_secure_remove "/var/log/uwsgi/app/$app"
 	fi
 }
-
 
 #=================================================
 #
