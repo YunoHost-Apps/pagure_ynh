@@ -72,10 +72,10 @@ ynh_app_setting_set "$app" final_path "$final_path"
 # INSTALL DEPENDENCIES
 #=================================================
 
-ynh_install_app_dependencies git python-virtualenv libgit2-dev \
+ynh_install_app_dependencies git virtualenv python-virtualenv libgit2-dev \
                  libjpeg-dev gcc libffi-dev python-dev python-cffi \
-                 postgresql python-psycopg2 \
-                 uwsgi uwsgi-plugin-python
+                 python-gdbm python-psycopg2 \
+                 postgresql uwsgi uwsgi-plugin-python
 
 #=================================================
 # CREATE A PostgreSQL DATABASE
@@ -139,7 +139,7 @@ ynh_add_uwsgi_service
 #=================================================
 
 ynh_setup_source_local "${final_path}"
-ln -s "${final_path}/pagure-3.13.2" "${final_path}/pagure"
+ln -s "${final_path}/pagure-4.0.3" "${final_path}/pagure"
 
 #=================================================
 # PIP INSTALLATION

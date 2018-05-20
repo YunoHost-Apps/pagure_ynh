@@ -8,6 +8,10 @@ from datetime import timedelta
 # (ie: changing a project's or a user's settings)
 ADMIN_SESSION_LIFETIME = timedelta(minutes=20)
 
+# Enable tickets and docs for all repos
+ENABLE_TICKETS = True
+ENABLE_DOCS = True
+
 ### Secret key for the Flask application
 SECRET_KEY='__SECRET_KEY__'
 
@@ -44,7 +48,7 @@ APP_URL = 'https://__DOMAIN__/'
 ### The URL at which the documentation of projects will be available
 ## This should be in a different domain to avoid XSS issues since we want
 ## to allow raw html to be displayed (different domain, ie not a sub-domain).
-DOC_APP_URL = None
+DOC_APP_URL = 'https://docs.__DOMAIN__'
 
 ### The URL to use to clone git repositories.
 GIT_URL_SSH = 'ssh://git@__DOMAIN__/'
@@ -55,27 +59,6 @@ GIT_FOLDER = os.path.join(
     os.path.abspath(os.path.dirname(__file__)),
     '..',
     'repos'
-)
-
-### Folder containing the docs repos
-DOCS_FOLDER = os.path.join(
-    os.path.abspath(os.path.dirname(__file__)),
-    '..',
-    'docs'
-)
-
-### Folder containing the tickets repos
-TICKETS_FOLDER = os.path.join(
-    os.path.abspath(os.path.dirname(__file__)),
-    '..',
-    'tickets'
-)
-
-### Folder containing the pull-requests repos
-REQUESTS_FOLDER = os.path.join(
-    os.path.abspath(os.path.dirname(__file__)),
-    '..',
-    'requests'
 )
 
 ### Folder containing the clones for the remote pull-requests

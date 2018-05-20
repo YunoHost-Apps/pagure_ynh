@@ -1,5 +1,5 @@
-SOURCE_URL=https://releases.pagure.org/pagure/pagure-3.13.2.tar.gz
-SOURCE_SUM=be22fe7918adf3cf7e037c6b76c19c48b2e4acd7da7c7fa11b05474052d8e868
+SOURCE_URL=https://releases.pagure.org/pagure/pagure-4.0.3.tar.gz
+SOURCE_SUM=1f9ae7381893995e364c92ee17a4dfd428adf642ed7c1d61873e196fd6c76359
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=false
