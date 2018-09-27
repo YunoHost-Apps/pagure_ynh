@@ -12,6 +12,9 @@ ADMIN_SESSION_LIFETIME = timedelta(minutes=20)
 ENABLE_TICKETS = True
 ENABLE_DOCS = True
 
+# Enables / Disables private projects
+PRIVATE_PROJECTS = True
+
 ### Secret key for the Flask application
 SECRET_KEY='__SECRET_KEY__'
 
@@ -19,6 +22,9 @@ SECRET_KEY='__SECRET_KEY__'
 #DB_URL=mysql://user:pass@host/db_name
 DB_URL = 'postgres://__DB_USER__:__DB_PWD__@localhost/__DB_NAME__'
 #DB_URL = 'sqlite:////var/tmp/pagure_dev.sqlite'
+
+### Send FedMsg notifications of events in pagure
+FEDMSG_NOTIFICATIONS = False
 
 ### The FAS group in which the admin of pagure are
 ADMIN_GROUP = ['sysadmin-main']
@@ -43,6 +49,12 @@ FROM_EMAIL = 'pagure@__DOMAIN__'
 DOMAIN_EMAIL_NOTIFICATIONS = '__DOMAIN__'
 SALT_EMAIL = '__SALT_EMAIL__'
 
+### Restrict outgoing emails to these domains:
+## If set, adding emailaccounts that don't end with these domainnames
+## will not be permitted. Mails to already existing emailaccounts
+## that are not covered by this list will not get sent.
+# ALLOWED_EMAIL_DOMAINS = [ 'localhost.localdomain', 'example.com' ]
+
 ### The URL at which the project is available.
 APP_URL = 'https://__DOMAIN__/'
 ### The URL at which the documentation of projects will be available
@@ -59,6 +71,12 @@ GIT_FOLDER = os.path.join(
     os.path.abspath(os.path.dirname(__file__)),
     '..',
     'repos'
+)
+
+REPOSPANNER_PSEUDO_FOLDER = os.path.join(
+    os.path.abspath(os.path.dirname(__file__)),
+    '..',
+    'pseudo'
 )
 
 ### Folder containing the clones for the remote pull-requests
@@ -160,9 +178,9 @@ REDIS_DB = __REDIS_DB__
 # Authentication related configuration option
 
 ### Switch the authentication method
-# Specify which authentication method to use, defaults to `fas` can be or
-# `local`
-# Default: ``fas``.
+# Specify which authentication method to use.
+# Available options: `fas`, `openid`, `oidc`, `local`
+# Default: ``local``.
 PAGURE_AUTH = 'local'
 
 # When this is set to True, the session cookie will only be returned to the
@@ -191,3 +209,27 @@ APPLICATION_ROOT = '/'
 # was running since before version 1.3 and if you care about backward
 # compatibility in your URLs.
 OLD_VIEW_COMMIT_ENABLED = False
+
+# repoSpanner integration settings
+# https://repospanner.org/
+# Whether to create new repositories on repoSpanner by default.
+# Either None or a region name.
+REPOSPANNER_NEW_REPO = None
+# Whether to allow admins to override region selection on creation.
+REPOSPANNER_NEW_REPO_ADMIN_OVERRIDE = False
+# Whether to create new forks on repoSpanner.
+# Either None (no repoSpanner), True (same as origin project) or a region name.
+REPOSPANNER_NEW_FORK = True
+# Whether to allow an admin to manually migrate an individual project.
+REPOSPANNER_ADMIN_MIGRATION = False
+# The repoSpanner regions to be used in this Pagure instance.
+# Example entry:
+# 'default': {'url': 'https://nodea.regiona.repospanner.local:8444',
+#             'repo_prefix': 'pagure/',
+#             'hook': None,
+#             'ca': '',
+#             'admin_cert': {'cert': '',
+#                            'key': ''},
+#             'push_cert': {'cert': '',
+#                           'key': ''}}
+REPOSPANNER_REGIONS = {}
