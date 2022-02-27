@@ -1,0 +1,15 @@
+[Unit]
+Description= SMTP filter (Milter) Daemon (talk to postfix over a socket)
+After=postfix.target
+Documentation=https://pagure.io/pagure
+
+[Service]
+Type=simple
+User=__APP__
+Group=__APP__
+WorkingDirectory=__FINALPATH__/
+ExecStart=__FINALPATH__/venv/bin/python3 __FINALPATH__/pagure-milters/comment_email_milter.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

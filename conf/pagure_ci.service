@@ -1,0 +1,16 @@
+[Unit]
+Description=__APP__ service integrating CI services with pagure
+After=redis.target
+Documentation=https://pagure.io/pagure
+
+[Service]
+Type=simple
+User=__APP__
+Group=__APP__
+WorkingDirectory=__FINALPATH__/
+ExecStart=__FINALPATH__/venv/bin/celery -A pagure.lib.tasks_services worker --loglevel=info -Q pagure_ci
+Environment="PAGURE_CONFIG=__FINALPATH__/pagure.cfg"
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

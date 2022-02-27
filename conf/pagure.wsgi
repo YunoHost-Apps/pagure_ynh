@@ -19,12 +19,12 @@ os.environ['TEMP'] = '/var/tmp/'
 
 # The following is only needed if you did not install pagure
 # as a python module (for example if you run it from a git clone).
-import sys
-sys.path.insert(0, '__FINALPATH__/pagure/')
+#import sys
+#sys.path.insert(0, '__FINALPATH__/')
 
 
 # The most important line to make the wsgi working
 from pagure.flask_app import create_app
 
 application = create_app()
-application.debug = True
+#application.debug = True

@@ -2,4 +2,6 @@ SOURCE_URL=https://releases.pagure.org/pagure/pagure-5.13.3.tar.gz
 SOURCE_SUM=f684d8193d4c4cf637b465c80cbfece6eb2b1646df3ec4f993adf75ea78d5a1a
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
-SOURCE_IN_SUBDIR=false
+SOURCE_IN_SUBDIR=true
+SOURCE_FILENAME=
+SOURCE_EXTRACT=true

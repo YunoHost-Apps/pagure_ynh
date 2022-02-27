@@ -1,48 +1,52 @@
 {
-	"name": "Pagure",
-	"id": "pagure",
-	"packaging_format": 1,
-	"requirements": {
-		"yunohost": ">= 4.3.0"
-	},
-	"description": {
-		"en": "Pagure is a git-centered forge, python based using pygit2."
-	},
-	"version": "5.0.1~ynh1",
-	"url": "https://pagure.io/pagure",
-	"license": "AGPL-3.0",
-	"maintainer": {
-		"name": "Jean-Baptiste Holcroft",
-		"email": "jean-baptiste@holcroft.fr"
-	},
-	"multi_instance": false,
-	"services": [
-		"nginx"
-	],
-	"arguments": {
-		"install" : [
-			{
-				"name": "domain",
-				"type": "domain"
-			},
-			{
-				"name": "path",
-				"type": "path",
-				"example": "/pagure",
-				"default": "/pagure"
-			},
-			{
-				"name": "is_public",
-				"type": "boolean",
-				"ask": {
-					"en": "Should Pagure be publicly accessible?"
-				},
-				"default": true
-			},
-			{
-				"name": "admin",
-				"type": "user"
-			}
-		]
-	}
+    "name": "Pagure",
+    "id": "pagure",
+    "packaging_format": 1,
+    "description": {
+        "en": "A git-centered forge, python based using pygit2."
+    },
+    "version": "5.13.3~ynh1",
+    "url": "https://pagure.io/pagure",
+    "upstream": {
+        "license": "AGPL-3.0",
+        "website": "https://pagure.io/pagure",
+        "demo": "https://pagure.io",
+        "admindoc": "https://docs.pagure.org/pagure/",
+        "code": "https://pagure.io/pagure"
+    },
+    "license": "AGPL-3.0",
+    "maintainer": {
+        "name": "Jean-Baptiste Holcroft",
+        "email": "jean-baptiste@holcroft.fr"
+    },
+    "requirements": {
+        "yunohost": ">= 4.3.0"
+    },
+    "multi_instance": true,
+    "services": [
+        "nginx"
+    ],
+    "arguments": {
+        "install": [
+            {
+                "name": "domain",
+                "type": "domain"
+            },
+            {
+                "name": "path",
+                "type": "path",
+                "example": "/pagure",
+                "default": "/pagure"
+            },
+            {
+                "name": "admin",
+                "type": "user"
+            },
+            {
+                "name": "is_public",
+                "type": "boolean",
+                "default": true
+            }
+        ]
+    }
 }

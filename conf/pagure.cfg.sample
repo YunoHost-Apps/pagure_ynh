@@ -20,7 +20,7 @@ SECRET_KEY='__SECRET_KEY__'
 
 ### url to the database server:
 #DB_URL=mysql://user:pass@host/db_name
-DB_URL = 'postgres://__DB_USER__:__DB_PWD__@localhost/__DB_NAME__'
+DB_URL = 'postgresql://__DB_USER__:__DB_PWD__@localhost/__DB_NAME__'
 #DB_URL = 'sqlite:////var/tmp/pagure_dev.sqlite'
 
 ### Send FedMsg notifications of events in pagure
@@ -32,13 +32,16 @@ ADMIN_GROUP = ['sysadmin-main']
 ### Hard-coded list of global admins
 PAGURE_ADMIN_USERS = ['__ADMIN__']
 
+### Enables sending email using SMTP credentials.
+EMAIL_SEND = True
+
 ### The email address to which the flask.log will send the errors (tracebacks)
 EMAIL_ERROR = 'root@__DOMAIN__'
 
 ### SMTP settings
 SMTP_SERVER = 'localhost'
-SMTP_PORT = 587
-SMTP_SSL = True
+SMTP_PORT = 25
+SMTP_SSL = False
 
 #Specify both for enabling SMTP with auth
 SMTP_USERNAME = None
@@ -55,16 +58,21 @@ SALT_EMAIL = '__SALT_EMAIL__'
 ## that are not covered by this list will not get sent.
 # ALLOWED_EMAIL_DOMAINS = [ 'localhost.localdomain', 'example.com' ]
 
+### Disallow remote pull requests
+## If set, remote pull requests will be disabled and not available
+## anymore as a selection in the PR dropdown menus
+DISABLE_REMOTE_PR = False
+
 ### The URL at which the project is available.
-APP_URL = 'https://__DOMAIN__/'
+APP_URL = 'https://__DOMAIN____PATH__'
 ### The URL at which the documentation of projects will be available
 ## This should be in a different domain to avoid XSS issues since we want
 ## to allow raw html to be displayed (different domain, ie not a sub-domain).
 DOC_APP_URL = 'https://docs.__DOMAIN__'
 
 ### The URL to use to clone git repositories.
-GIT_URL_SSH = 'ssh://git@__DOMAIN__/'
-GIT_URL_GIT = 'git://__DOMAIN__/'
+GIT_URL_SSH = 'ssh://git@__DOMAIN____PATH__'
+GIT_URL_GIT = 'git://__DOMAIN____PATH__'
 
 ### Folder containing to the git repos
 GIT_FOLDER = os.path.join(
@@ -233,3 +241,7 @@ REPOSPANNER_ADMIN_MIGRATION = False
 #             'push_cert': {'cert': '',
 #                           'key': ''}}
 REPOSPANNER_REGIONS = {}
+
+# Path to the plugins configuration file that is used to load plugins. Please
+# look at files/plugins.cfg.sample for a configuration example.
+# PAGURE_PLUGINS_CONFIG = "/etc/pagure/plugins.cfg"
