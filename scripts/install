@@ -160,7 +160,7 @@ pushd "$final_path"
 	pip install -r requirements.txt
 	mkdir -p "${final_path}"/lcl/{repos,remotes,attachments,releases}
 	ynh_add_config --template="../conf/alembic.ini" --destination="$final_path/alembic.ini"
-	PAGURE_CONFIG=${final_path}/pagure.cfg python createdb.py --initial alembic.ini
+	ynh_exec_warn_less PAGURE_CONFIG=${final_path}/pagure.cfg python createdb.py --initial alembic.ini
 popd
 
 ynh_replace_string --match_string="validators.Required" --replace_string="validators.DataRequired" --target_file="$final_path/pagure/forms.py"
