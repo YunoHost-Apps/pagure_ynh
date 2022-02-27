@@ -124,7 +124,16 @@ ynh_add_uwsgi_service --service="$app" --template="uwsgi.ini"
 #=================================================
 ynh_script_progression --message="Integrating service in YunoHost..."
 
-yunohost service add $app --log="/var/log/$app/$app.log"
+yunohost service add ${app}_authorized_keys_worker
+yunohost service add ${app}_ci
+#yunohost service add ${app}_ev_server
+yunohost service add ${app}_gitolite_worker
+yunohost service add ${app}_loadjson
+yunohost service add ${app}_logcom
+#yunohost service add ${app}_milters
+yunohost service add ${app}_mirror
+yunohost service add ${app}_webhook
+yunohost service add ${app}_worker
 
 #=================================================
 # START SYSTEMD SERVICE
