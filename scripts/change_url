@@ -79,17 +79,17 @@ fi
 #=================================================
 ynh_script_progression --message="Stopping a systemd service..."
 
-ynh_systemd_action --service_name=${app}_authorized_keys_worker --action="stop" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_ci --action="stop" --log_path="systemd" --line_match="ready"
-#ynh_systemd_action --service_name=${app}_ev_server --action="stop" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_gitolite_worker --action="stop" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_loadjson --action="stop" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_logcom --action="stop" --log_path="systemd" --line_match="ready"
-#ynh_systemd_action --service_name=${app}_milters --action="stop" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_mirror --action="stop" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_webhook --action="stop" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_worker --action="stop" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name="uwsgi-app@$app.service" --action="stop" --log_path="systemd" --line_match="Started"
+ynh_systemd_action --service_name=${app}_authorized_keys_worker --action="stop" --log_path="systemd"
+ynh_systemd_action --service_name=${app}_ci --action="stop" --log_path="systemd"
+#ynh_systemd_action --service_name=${app}_ev_server --action="stop" --log_path="systemd"
+ynh_systemd_action --service_name=${app}_gitolite_worker --action="stop" --log_path="systemd"
+ynh_systemd_action --service_name=${app}_loadjson --action="stop" --log_path="systemd"
+ynh_systemd_action --service_name=${app}_logcom --action="stop" --log_path="systemd"
+#ynh_systemd_action --service_name=${app}_milters --action="stop" --log_path="systemd"
+ynh_systemd_action --service_name=${app}_mirror --action="stop" --log_path="systemd"
+ynh_systemd_action --service_name=${app}_webhook --action="stop" --log_path="systemd"
+ynh_systemd_action --service_name=${app}_worker --action="stop" --log_path="systemd"
+ynh_systemd_action --service_name="uwsgi-app@$app.service" --action="stop" --log_path="systemd"
 
 #=================================================
 # MODIFY URL IN NGINX CONF

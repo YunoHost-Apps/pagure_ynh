@@ -101,7 +101,7 @@ systemctl enable ${app}_authorized_keys_worker.service --quiet
 ynh_restore_file --origin_path="/etc/systemd/system/${app}_ci.service"
 systemctl enable ${app}_ci.service --quiet
 #ynh_restore_file --origin_path="/etc/systemd/system/${app}_ev_server.service"
-systemctl enable ${app}_ev_server.service --quiet
+#systemctl enable ${app}_ev_server.service --quiet
 ynh_restore_file --origin_path="/etc/systemd/system/${app}_gitolite_worker.service"
 systemctl enable ${app}_gitolite_worker.service --quiet
 ynh_restore_file --origin_path="/etc/systemd/system/${app}_loadjson.service"
@@ -109,7 +109,7 @@ systemctl enable ${app}_loadjson.service --quiet
 ynh_restore_file --origin_path="/etc/systemd/system/${app}_logcom.service"
 systemctl enable ${app}_logcom.service --quiet
 #ynh_restore_file --origin_path="/etc/systemd/system/${app}_milters.service"
-systemctl enable ${app}_milters.service --quiet
+#systemctl enable ${app}_milters.service --quiet
 ynh_restore_file --origin_path="/etc/systemd/system/${app}_mirror.service"
 systemctl enable ${app}_mirror.service --quiet
 ynh_restore_file --origin_path="/etc/systemd/system/${app}_webhook.service"
