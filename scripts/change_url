@@ -129,6 +129,9 @@ fi
 #=================================================
 ynh_script_progression --message="Updating a configuration file..."
 
+domain=$new_domain
+path_url=$new_path
+
 ynh_add_config --template="../conf/pagure.cfg.sample" --destination="$final_path/pagure.cfg"
 
 chmod 400 "$final_path/pagure.cfg"
