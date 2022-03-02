@@ -159,6 +159,7 @@ ynh_add_uwsgi_service --service="$app" --template="uwsgi.ini"
 ynh_script_progression --message="Building app..."
 
 pushd "$final_path"
+	ynh_secure_remove --file="${final_path}/venv"
 	python3 -m venv venv
 	source ./venv/bin/activate
 	pip install --upgrade pip
