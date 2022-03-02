@@ -7,6 +7,8 @@
 #=================================================
 
 source _common.sh
+source ynh_redis
+source ynh_uwsgi_service__2
 source /usr/share/yunohost/helpers
 
 #=================================================
