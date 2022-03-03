@@ -1,0 +1,16 @@
+[Unit]
+Description=__APP__ service mirroring projects outside of pagure that asked for it
+After=redis.target
+Documentation=https://pagure.io/pagure
+
+[Service]
+Type=simple
+User=__APP__
+Group=__APP__
+WorkingDirectory=__FINALPATH__/
+ExecStart=__FINALPATH__/venv/bin/celery -A pagure.lib.tasks_mirror worker --loglevel=info -Q pagure_mirror
+Environment="PAGURE_CONFIG=__FINALPATH__/pagure.cfg"
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
