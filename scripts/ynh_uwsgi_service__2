@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pkg_dependencies="$pkg_dependencies uwsgi uwsgi-plugin-python3 uwsgi-plugin-python"
+pkg_dependencies="$pkg_dependencies uwsgi uwsgi-plugin-python3"
 
 # Check if system wide templates are available and correcly configured
 #
