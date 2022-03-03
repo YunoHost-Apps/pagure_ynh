@@ -156,7 +156,7 @@ pushd "$final_path"
 	pip install cffi
 	pip install psycopg2
 	pip install pyyaml
-	pip install pygit2==0.27
+	pip install pygit2
 	pip install -r requirements.txt
 	mkdir -p "${final_path}"/lcl/{repos,remotes,attachments,releases}
 	ynh_add_config --template="../conf/alembic.ini" --destination="$final_path/alembic.ini"
