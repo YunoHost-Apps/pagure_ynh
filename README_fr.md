@@ -17,6 +17,10 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 
 **Démo :** https://pagure.io
 
+## Captures d'écran
+
+![](./doc/screenshots/screenshot.png)
+
 ## Avertissements / informations importantes
 
 * The admin you choose during the installation has been added to the PAGURE_ADMIN_USERS

@@ -21,6 +21,10 @@ A git-centered forge, python based using pygit2.
 
 **Demo:** https://pagure.io
 
+## Screenshots
+
+![](./doc/screenshots/screenshot.png)
+
 ## Disclaimers / important information
 
 * The admin you choose during the installation has been added to the PAGURE_ADMIN_USERS
