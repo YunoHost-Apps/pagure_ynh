@@ -174,7 +174,6 @@ pushd "$final_path"
 	pip install pygit2
 	pip install "jinja2<3.1.0"
 	pip install -r requirements.txt
-	read -p "ppp"
 	ynh_add_config --template="../conf/alembic.ini" --destination="$final_path/alembic.ini"
 	PAGURE_CONFIG=${final_path}/pagure.cfg python createdb.py --initial alembic.ini 2>&1
 popd
