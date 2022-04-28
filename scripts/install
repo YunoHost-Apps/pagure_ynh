@@ -27,8 +27,8 @@ ynh_abort_if_errors
 
 domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
-admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
+admin=$YNH_APP_ARG_ADMIN
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -111,6 +111,21 @@ ynh_add_nginx_config
 #=================================================
 # SPECIFIC SETUP
 #=================================================
+# CREATE DATA DIRECTORY
+#=================================================
+ynh_script_progression --message="Creating a data directory..."
+
+datadir=/home/yunohost.app/$app
+ynh_app_setting_set --app=$app --key=datadir --value=$datadir
+
+mkdir -p $datadir
+mkdir -p "${datadir}"/{repos,remotes,attachments,releases}
+
+chmod 750 "$datadir"
+chmod -R o-rwx "$datadir"
+chown -R $app:www-data "$datadir"
+
+#=================================================
 # ADD A CONFIGURATION
 #=================================================
 ynh_script_progression --message="Adding a configuration file..."
@@ -157,8 +172,9 @@ pushd "$final_path"
 	pip install psycopg2
 	pip install pyyaml
 	pip install pygit2
+	pip install "jinja2<3.1.0"
 	pip install -r requirements.txt
-	mkdir -p "${final_path}"/lcl/{repos,remotes,attachments,releases}
+	read -p "ppp"
 	ynh_add_config --template="../conf/alembic.ini" --destination="$final_path/alembic.ini"
 	PAGURE_CONFIG=${final_path}/pagure.cfg python createdb.py --initial alembic.ini 2>&1
 popd
