@@ -5,7 +5,7 @@
     "description": {
         "en": "A git-centered forge, python based using pygit2."
     },
-    "version": "5.13.3~ynh1",
+    "version": "5.13.3~ynh2",
     "url": "https://pagure.io/pagure",
     "upstream": {
         "license": "AGPL-3.0",
@@ -39,13 +39,13 @@
                 "default": "/pagure"
             },
             {
-                "name": "admin",
-                "type": "user"
-            },
-            {
                 "name": "is_public",
                 "type": "boolean",
                 "default": true
+            },
+            {
+                "name": "admin",
+                "type": "user"
             }
         ]
     }

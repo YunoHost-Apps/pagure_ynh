@@ -39,6 +39,7 @@ db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 redis_db=$(ynh_app_setting_get --app=$app --key=redis_db)
 secret_key=$(ynh_app_setting_get --app=$app --key=secret_key)
 salt_email=$(ynh_app_setting_get --app=$app --key=salt_email)
+datadir=$(ynh_app_setting_get --app=$app --key=datadir)
 
 #=================================================
 # BACKUP BEFORE CHANGE URL THEN ACTIVE TRAP
