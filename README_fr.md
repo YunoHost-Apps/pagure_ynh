@@ -13,9 +13,13 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 
 
 
-**Version incluse :** 5.13.3~ynh1
+**Version incluse :** 5.13.3~ynh2
 
 **Démo :** https://pagure.io
+
+## Captures d'écran
+
+![](./doc/screenshots/screenshot.png)
 
 ## Avertissements / informations importantes
 

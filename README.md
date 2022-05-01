@@ -17,9 +17,13 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 A git-centered forge, python based using pygit2.
 
-**Shipped version:** 5.13.3~ynh1
+**Shipped version:** 5.13.3~ynh2
 
 **Demo:** https://pagure.io
+
+## Screenshots
+
+![](./doc/screenshots/screenshot.png)
 
 ## Disclaimers / important information
 
