@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC STARTING
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -12,86 +10,13 @@ source ynh_uwsgi_service__2
 source /usr/share/yunohost/helpers
 
 #=================================================
-# RETRIEVE ARGUMENTS
-#=================================================
-
-#REMOVEME? old_domain=$YNH_APP_OLD_DOMAIN
-#REMOVEME? old_path=$YNH_APP_OLD_PATH
-
-#REMOVEME? new_domain=$YNH_APP_NEW_DOMAIN
-#REMOVEME? new_path=$YNH_APP_NEW_PATH
-
-#REMOVEME? app=$YNH_APP_INSTANCE_NAME
-
-#=================================================
-# LOAD SETTINGS
-#=================================================
-#REMOVEME? ynh_script_progression --message="Loading installation settings..."
-
-#REMOVEME? # Needed for helper "ynh_add_nginx_config"
-#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
-
-# Add settings here as needed by your application
-#REMOVEME? admin=$(ynh_app_setting_get --app=$app --key=admin)
-#REMOVEME? db_name=$(ynh_app_setting_get --app=$app --key=db_name)
-#REMOVEME? db_user=$db_name
-#REMOVEME? db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
-#REMOVEME? redis_db=$(ynh_app_setting_get --app=$app --key=redis_db)
-#REMOVEME? secret_key=$(ynh_app_setting_get --app=$app --key=secret_key)
-#REMOVEME? salt_email=$(ynh_app_setting_get --app=$app --key=salt_email)
-#REMOVEME? data_dir=$(ynh_app_setting_get --app=$app --key=data_dir)
-
-#=================================================
-# BACKUP BEFORE CHANGE URL THEN ACTIVE TRAP
-#=================================================
-#REMOVEME? ynh_script_progression --message="Backing up the app before changing its URL (may take a while)..."
-
-# Backup the current version of the app
-#REMOVEME? ynh_backup_before_upgrade
-#REMOVEME? ynh_clean_setup () {
-	#REMOVEME? ynh_clean_check_starting
-	# Remove the new domain config file, the remove script won't do it as it doesn't know yet its location.
-#REMOVEME? 	ynh_secure_remove --file="/etc/nginx/conf.d/$new_domain.d/$app.conf"
-
-	# Restore it if the upgrade fails
-#REMOVEME? 	ynh_restore_upgradebackup
-}
-# Exit if an error occurs during the execution of the script
-#REMOVEME? ynh_abort_if_errors
-
-#=================================================
-# CHECK WHICH PARTS SHOULD BE CHANGED
-#=================================================
-
-#REMOVEME? change_domain=0
-#REMOVEME? if [ "$old_domain" != "$new_domain" ]
-then
-	#REMOVEME? change_domain=1
-fi
-
-#REMOVEME? change_path=0
-#REMOVEME? if [ "$old_path" != "$new_path" ]
-then
-	#REMOVEME? change_path=1
-fi
-
-#=================================================
-# STANDARD MODIFICATIONS
-#=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
 ynh_script_progression --message="Stopping a systemd service..."
 
-ynh_systemd_action --service_name=${app}_authorized_keys_worker --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_ci --action="stop" --log_path="systemd"
-#ynh_systemd_action --service_name=${app}_ev_server --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_gitolite_worker --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_loadjson --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_logcom --action="stop" --log_path="systemd"
-#ynh_systemd_action --service_name=${app}_milters --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_mirror --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_webhook --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_worker --action="stop" --log_path="systemd"
+for service in "${services[@]}"; do
+    ynh_systemd_action --service_name="${app}_${service}" --action="stop" --log_path="systemd"
+done
 ynh_systemd_action --service_name="uwsgi-app@$app.service" --action="stop" --log_path="systemd"
 
 #=================================================
@@ -101,74 +26,29 @@ ynh_script_progression --message="Updating NGINX web server configuration..."
 
 ynh_change_url_nginx_config
 
-#REMOVEME? nginx_conf_path=/etc/nginx/conf.d/$old_domain.d/$app.conf
-
-# Change the path in the NGINX config file
-if [ $change_path -eq 1 ]
-then
-	# Make a backup of the original NGINX config file if modified
-#REMOVEME? 	ynh_backup_if_checksum_is_different --file="$nginx_conf_path"
-	# Set global variables for NGINX helper
-#REMOVEME? 	domain="$old_domain"
-#REMOVEME? 	path="$new_path"
-	# Create a dedicated NGINX config
-#REMOVEME? 	ynh_add_nginx_config
-fi
-
-# Change the domain for NGINX
-if [ $change_domain -eq 1 ]
-then
-	# Delete file checksum for the old conf file location
-#REMOVEME? 	ynh_delete_file_checksum --file="$nginx_conf_path"
-#REMOVEME? 	mv $nginx_conf_path /etc/nginx/conf.d/$new_domain.d/$app.conf
-	# Store file checksum for the new config file location
-#REMOVEME? 	ynh_store_file_checksum --file="/etc/nginx/conf.d/$new_domain.d/$app.conf"
-fi
-
-#=================================================
-# SPECIFIC MODIFICATIONS
 #=================================================
 # UPDATE A CONFIG FILE
 #=================================================
 ynh_script_progression --message="Updating a configuration file..."
-#REMOVEME? 
-domain=$new_domain
-path=$new_path
 
-ynh_add_config --template="../conf/pagure.cfg.sample" --destination="$install_dir/pagure.cfg"
+ynh_add_config --template="pagure.cfg.sample" --destination="$install_dir/pagure.cfg"
 
 chmod 400 "$install_dir/pagure.cfg"
-chown $app:$app "$install_dir/pagure.cfg"
+chown "$app:$app" "$install_dir/pagure.cfg"
 
-ynh_add_config --template="../conf/pagure.wsgi" --destination="$install_dir/pagure.wsgi"
+ynh_add_config --template="pagure.wsgi" --destination="$install_dir/pagure.wsgi"
 ynh_add_uwsgi_service --service="$app" --template="uwsgi.ini"
 
-#=================================================
-# GENERIC FINALISATION
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
 ynh_script_progression --message="Starting a systemd service..."
 
 # Start a systemd service
-ynh_systemd_action --service_name=${app}_authorized_keys_worker --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_ci --action="start" --log_path="systemd" --line_match="ready"
-#ynh_systemd_action --service_name=${app}_ev_server --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_gitolite_worker --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_loadjson --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_logcom --action="start" --log_path="systemd" --line_match="ready"
-#ynh_systemd_action --service_name=${app}_milters --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_mirror --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_webhook --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_worker --action="start" --log_path="systemd" --line_match="ready"
+for service in "${services[@]}"; do
+    ynh_systemd_action --service_name="${app}_${service}" --action="start" --log_path="systemd" --line_match="ready"
+done
 ynh_systemd_action --service_name="uwsgi-app@$app.service" --action="start" --log_path="systemd" --line_match="Started"
-
-#=================================================
-# RELOAD NGINX
-#=================================================
-#REMOVEME? ynh_script_progression --message="Reloading NGINX web server..."
-
-#REMOVEME? #REMOVEME? ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT

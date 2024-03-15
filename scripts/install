@@ -91,7 +91,7 @@ yunohost service add "uwsgi-app@$app"
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..."
+ynh_script_progression --message="Starting $app's systemd services..."
 
 # Start a systemd service
 for service in "${services[@]}"; do
