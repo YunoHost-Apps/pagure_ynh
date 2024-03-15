@@ -9,7 +9,7 @@ import pkg_resources
 
 # Set the environment variable pointing to the configuration file
 import os
-os.environ['PAGURE_CONFIG'] = '__FINALPATH__/pagure.cfg'
+os.environ['PAGURE_CONFIG'] = '__INSTALL_DIR__/pagure.cfg'
 
 # Set the environment variable if the tmp folder needs to be moved
 # Might be necessary to work around bug in libgit2:
@@ -20,7 +20,7 @@ os.environ['TEMP'] = '/var/tmp/'
 # The following is only needed if you did not install pagure
 # as a python module (for example if you run it from a git clone).
 #import sys
-#sys.path.insert(0, '__FINALPATH__/')
+#sys.path.insert(0, '__INSTALL_DIR__/')
 
 
 # The most important line to make the wsgi working

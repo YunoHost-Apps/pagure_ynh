@@ -7,9 +7,9 @@ Documentation=https://pagure.io/pagure
 Type=simple
 User=__APP__
 Group=__APP__
-WorkingDirectory=__FINALPATH__/
-ExecStart=__FINALPATH__/venv/bin/celery -A pagure.lib.tasks_services worker --loglevel=info -Q pagure_logcom
-Environment="PAGURE_CONFIG=__FINALPATH__/pagure.cfg"
+WorkingDirectory=__INSTALL_DIR__/
+ExecStart=__INSTALL_DIR__/venv/bin/celery -A pagure.lib.tasks_services worker --loglevel=info -Q pagure_logcom
+Environment="PAGURE_CONFIG=__INSTALL_DIR__/pagure.cfg"
 Restart=on-failure
 
 [Install]

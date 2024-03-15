@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -12,216 +10,95 @@ source ynh_uwsgi_service__2
 source /usr/share/yunohost/helpers
 
 #=================================================
-# LOAD SETTINGS
-#=================================================
-ynh_script_progression --message="Loading installation settings..."
-
-app=$YNH_APP_INSTANCE_NAME
-
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-path_url=$(ynh_app_setting_get --app=$app --key=path)
-admin=$(ynh_app_setting_get --app=$app --key=admin)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-db_name=$(ynh_app_setting_get --app=$app --key=db_name)
-db_user=$db_name
-db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
-datadir=$(ynh_app_setting_get --app=$app --key=datadir)
-redis_db=$(ynh_app_setting_get --app=$app --key=redis_db)
-secret_key=$(ynh_app_setting_get --app=$app --key=secret_key)
-salt_email=$(ynh_app_setting_get --app=$app --key=salt_email)
-
-#=================================================
-# CHECK VERSION
-#=================================================
-ynh_script_progression --message="Checking version..."
-
-upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
-#=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
-
-# Backup the current version of the app
-ynh_backup_before_upgrade
-ynh_clean_setup () {
-	ynh_clean_check_starting
-	# Restore it if the upgrade fails
-	ynh_restore_upgradebackup
-}
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
-
-#=================================================
-# STANDARD UPGRADE STEPS
-#=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
 ynh_script_progression --message="Stopping a systemd service..."
 
-ynh_systemd_action --service_name=${app}_authorized_keys_worker --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_ci --action="stop" --log_path="systemd"
-#ynh_systemd_action --service_name=${app}_ev_server --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_gitolite_worker --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_loadjson --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_logcom --action="stop" --log_path="systemd"
-#ynh_systemd_action --service_name=${app}_milters --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_mirror --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_webhook --action="stop" --log_path="systemd"
-ynh_systemd_action --service_name=${app}_worker --action="stop" --log_path="systemd"
+for service in "${services[@]}"; do
+    ynh_systemd_action --service_name="${app}_${service}" --action="stop" --log_path="systemd"
+done
 ynh_systemd_action --service_name="uwsgi-app@$app.service" --action="stop" --log_path="systemd"
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
-ynh_script_progression --message="Ensuring downward compatibility..."
-
-# Cleaning legacy permissions
-if ynh_legacy_permissions_exists; then
-	ynh_legacy_permissions_delete_all
-
-	ynh_app_setting_delete --app=$app --key=is_public
-fi
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..."
-
-# Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir="$final_path"
+# ynh_script_progression --message="Ensuring downward compatibility..."
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
+ynh_script_progression --message="Upgrading source files..."
 
-if [ "$upgrade_type" == "UPGRADE_APP" ]
-then
-	ynh_script_progression --message="Upgrading source files..."
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source --dest_dir="$install_dir"
 
-	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path"
-fi
+chmod -R o-rwx "$install_dir"
+chown -R "$app:www-data" "$install_dir"
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
-
-#=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Upgrading NGINX web server configuration..."
-
-# Create a dedicated NGINX config
-ynh_add_nginx_config
-
-#=================================================
-# UPGRADE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Upgrading dependencies..."
-
-ynh_install_app_dependencies $pkg_dependencies
-
-#=================================================
-# SPECIFIC UPGRADE
 #=================================================
 # UPDATE A CONFIG FILE
 #=================================================
 ynh_script_progression --message="Updating a configuration file..."
 
-ynh_add_config --template="../conf/pagure.cfg.sample" --destination="$final_path/pagure.cfg"
+ynh_add_config --template="pagure.cfg.sample" --destination="$install_dir/pagure.cfg"
 
-chmod 400 "$final_path/pagure.cfg"
-chown $app:$app "$final_path/pagure.cfg"
-
-#=================================================
-# SETUP SYSTEMD
-#=================================================
-ynh_script_progression --message="Configuring a systemd service..."
-
-# Create a dedicated systemd config
-ynh_add_systemd_config --service="${app}_authorized_keys_worker" --template="pagure_authorized_keys_worker.service"
-ynh_add_systemd_config --service="${app}_ci" --template="pagure_ci.service"
-#ynh_add_systemd_config --service="${app}_ev_server" --template="pagure_ev_server.service"
-ynh_add_systemd_config --service="${app}_gitolite_worker" --template="pagure_gitolite_worker.service"
-ynh_add_systemd_config --service="${app}_loadjson" --template="pagure_loadjson.service"
-ynh_add_systemd_config --service="${app}_logcom" --template="pagure_logcom.service"
-#ynh_add_systemd_config --service="${app}_milters" --template="pagure_milters.service"
-ynh_add_systemd_config --service="${app}_mirror" --template="pagure_mirror.service"
-ynh_add_systemd_config --service="${app}_webhook" --template="pagure_webhook.service"
-ynh_add_systemd_config --service="${app}_worker" --template="pagure_worker.service"
-
-ynh_add_config --template="../conf/pagure.wsgi" --destination="$final_path/pagure.wsgi"
-ynh_add_uwsgi_service --service="$app" --template="uwsgi.ini"
+chmod 400 "$install_dir/pagure.cfg"
+chown "$app:$app" "$install_dir/pagure.cfg"
 
 #=================================================
 # BUILD APP
 #=================================================
 ynh_script_progression --message="Building app..."
 
-pushd "$final_path"
-	ynh_secure_remove --file="${final_path}/venv"
-	python3 -m venv venv
-	source ./venv/bin/activate
-	pip install --upgrade pip
-	pip install wheel
-	pip install cffi
-	pip install psycopg2
-	pip install pyyaml
-	pip install pygit2
-	pip install "jinja2<3.1.0"
-	pip install -r requirements.txt
-	ynh_add_config --template="../conf/alembic.ini" --destination="$final_path/alembic.ini"
-	PAGURE_CONFIG=${final_path}/pagure.cfg alembic upgrade head 2>&1
+pushd "$install_dir"
+    ynh_secure_remove --file="${install_dir}/venv"
+    ynh_exec_as "$app" python3 -m venv venv
+    ynh_exec_as "$app" "$install_dir/venv/bin/python3" -m pip install --upgrade pip
+    ynh_exec_as "$app" "$install_dir/venv/bin/python3" -m pip install wheel
+    ynh_exec_as "$app" "$install_dir/venv/bin/python3" -m pip install cffi
+    ynh_exec_as "$app" "$install_dir/venv/bin/python3" -m pip install psycopg2
+    ynh_exec_as "$app" "$install_dir/venv/bin/python3" -m pip install pyyaml
+    ynh_exec_as "$app" "$install_dir/venv/bin/python3" -m pip install pygit2
+    ynh_exec_as "$app" "$install_dir/venv/bin/python3" -m pip install "jinja2<3.1.0"
+    ynh_exec_as "$app" "$install_dir/venv/bin/python3" -m pip install -r requirements.txt
+
+    ynh_add_config --template="alembic.ini" --destination="$install_dir/alembic.ini"
+    ynh_exec_as "$app" PAGURE_CONFIG="${install_dir}/pagure.cfg" "$install_dir/venv/bin/python3" alembic upgrade head 2>&1
 popd
 
-ynh_replace_string --match_string="validators.Required" --replace_string="validators.DataRequired" --target_file="$final_path/pagure/forms.py"
+ynh_replace_string --match_string="validators.Required" --replace_string="validators.DataRequired" --target_file="$install_dir/pagure/forms.py"
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
+chmod -R o-rwx "$install_dir"
+chown -R "$app:www-data" "$install_dir"
 
 #=================================================
-# GENERIC FINALIZATION
+# REAPPLY SYSTEM CONFIGURATIONS
 #=================================================
-# INTEGRATE SERVICE IN YUNOHOST
-#=================================================
-ynh_script_progression --message="Integrating service in YunoHost..."
+ynh_script_progression --message="Upgrading system configurations related to $app..." --weight=1
 
-yunohost service add ${app}_authorized_keys_worker
-yunohost service add ${app}_ci
-#yunohost service add ${app}_ev_server
-yunohost service add ${app}_gitolite_worker
-yunohost service add ${app}_loadjson
-yunohost service add ${app}_logcom
-#yunohost service add ${app}_milters
-yunohost service add ${app}_mirror
-yunohost service add ${app}_webhook
-yunohost service add ${app}_worker
+# Create a dedicated NGINX config
+ynh_add_nginx_config
+
+# Create a dedicated systemd config
+for service in "${services[@]}"; do
+    ynh_add_systemd_config --service="${app}_${service}" --template="pagure_${service}.service"
+    yunohost service add "${app}_${service}"
+done
+
+ynh_add_config --template="pagure.wsgi" --destination="$install_dir/pagure.wsgi"
+ynh_add_uwsgi_service --service="$app" --template="uwsgi.ini"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..."
+ynh_script_progression --message="Starting $app's systemd services..."
 
-ynh_systemd_action --service_name=${app}_authorized_keys_worker --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_ci --action="start" --log_path="systemd" --line_match="ready"
-#ynh_systemd_action --service_name=${app}_ev_server --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_gitolite_worker --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_loadjson --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_logcom --action="start" --log_path="systemd" --line_match="ready"
-#ynh_systemd_action --service_name=${app}_milters --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_mirror --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_webhook --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name=${app}_worker --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name="uwsgi-app@$app.service" --action="start" --log_path="systemd" --line_match="Started"
+# Start a systemd service
+for service in "${services[@]}"; do
+    ynh_systemd_action --service_name="${app}_${service}" --action="start" --log_path="systemd" --line_match="ready"
+done
 
-#=================================================
-# RELOAD NGINX
-#=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
-
-ynh_systemd_action --service_name=nginx --action=reload
+ynh_systemd_action --service_name="uwsgi-app@$app.service" --action="start" --log_path="systemd"
 
 #=================================================
 # END OF SCRIPT

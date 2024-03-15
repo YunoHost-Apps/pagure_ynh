@@ -75,12 +75,12 @@ GIT_URL_SSH = 'ssh://git@__DOMAIN____PATH__'
 GIT_URL_GIT = 'git://__DOMAIN____PATH__'
 
 ### Folder containing to the git repos
-GIT_FOLDER = '__DATADIR__/repos'
+GIT_FOLDER = '__DATA_DIR__/repos'
 
-REPOSPANNER_PSEUDO_FOLDER = '__DATADIR__/pseudo'
+REPOSPANNER_PSEUDO_FOLDER = '__DATA_DIR__/pseudo'
 
 ### Folder containing the clones for the remote pull-requests
-REMOTE_GIT_FOLDER = '__DATADIR__/remotes'
+REMOTE_GIT_FOLDER = '__DATA_DIR__/remotes'
 
 ### Whether to enable scanning for viruses in attachments
 VIRUS_SCAN_ATTACHMENTS = False
