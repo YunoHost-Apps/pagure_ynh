@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -12,175 +10,35 @@ source ynh_uwsgi_service__2
 source /usr/share/yunohost/helpers
 
 #=================================================
-# LOAD SETTINGS
+# REMOVE SYSTEM CONFIGURATIONS
 #=================================================
-ynh_script_progression --message="Loading installation settings..."
+ynh_script_progression --message="Removing system configurations related to $app..." --weight=1
 
-app=$YNH_APP_INSTANCE_NAME
-
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-db_name=$(ynh_app_setting_get --app=$app --key=db_name)
-db_user=$db_name
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-datadir=$(ynh_app_setting_get --app=$app --key=datadir)
-redis_db=$(ynh_app_setting_get --app=$app --key=redis_db)
-
-#=================================================
-# STANDARD REMOVE
-#=================================================
-# REMOVE SERVICE INTEGRATION IN YUNOHOST
-#=================================================
-
-# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
-if ynh_exec_warn_less yunohost service status ${app}_authorized_keys_worker >/dev/null
-then
-	ynh_script_progression --message="Removing ${app}_authorized_keys_worker service integration..."
-	yunohost service remove ${app}_authorized_keys_worker
-fi
-
-# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
-if ynh_exec_warn_less yunohost service status ${app}_ci >/dev/null
-then
-	ynh_script_progression --message="Removing ${app}_ci service integration..."
-	yunohost service remove ${app}_ci
-fi
-
-# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
-if ynh_exec_warn_less yunohost service status ${app}_ev_server >/dev/null
-then
-	ynh_script_progression --message="Removing ${app}_ev_server service integration..."
-	yunohost service remove ${app}_ev_server
-fi
-
-# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
-if ynh_exec_warn_less yunohost service status ${app}_gitolite_worker >/dev/null
-then
-	ynh_script_progression --message="Removing ${app}_gitolite_worker service integration..."
-	yunohost service remove ${app}_gitolite_worker
-fi
-
-# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
-if ynh_exec_warn_less yunohost service status ${app}_loadjson >/dev/null
-then
-	ynh_script_progression --message="Removing ${app}_loadjson service integration..."
-	yunohost service remove ${app}_loadjson
-fi
-
-# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
-if ynh_exec_warn_less yunohost service status ${app}_logcom >/dev/null
-then
-	ynh_script_progression --message="Removing ${app}_logcom service integration..."
-	yunohost service remove ${app}_logcom
-fi
-
-# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
-if ynh_exec_warn_less yunohost service status ${app}_milters >/dev/null
-then
-	ynh_script_progression --message="Removing ${app}_milters service integration..."
-	yunohost service remove ${app}_milters
-fi
-
-# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
-if ynh_exec_warn_less yunohost service status ${app}_mirror >/dev/null
-then
-	ynh_script_progression --message="Removing ${app}_mirror service integration..."
-	yunohost service remove ${app}_mirror
-fi
-
-# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
-if ynh_exec_warn_less yunohost service status ${app}_webhook >/dev/null
-then
-	ynh_script_progression --message="Removing ${app}_webhook service integration..."
-	yunohost service remove ${app}_webhook
-fi
-
-# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
-if ynh_exec_warn_less yunohost service status ${app}_worker >/dev/null
-then
-	ynh_script_progression --message="Removing ${app}_worker service integration..."
-	yunohost service remove ${app}_worker
-fi
-
-#=================================================
-# STOP AND REMOVE SERVICE
-#=================================================
-ynh_script_progression --message="Stopping and removing the systemd service..."
-
-# Remove the dedicated systemd config
-ynh_remove_systemd_config --service="${app}_authorized_keys_worker"
-ynh_remove_systemd_config --service="${app}_ci"
-#ynh_remove_systemd_config --service="${app}_ev_server"
-ynh_remove_systemd_config --service="${app}_gitolite_worker"
-ynh_remove_systemd_config --service="${app}_loadjson"
-ynh_remove_systemd_config --service="${app}_logcom"
-#ynh_remove_systemd_config --service="${app}_milters"
-ynh_remove_systemd_config --service="${app}_mirror"
-ynh_remove_systemd_config --service="${app}_webhook"
-ynh_remove_systemd_config --service="${app}_worker"
+services=(
+    "${app}_authorized_keys_worker"
+    "${app}_ci"
+    "${app}_ev_server"
+    "${app}_gitolite_worker"
+    "${app}_loadjson"
+    "${app}_logcom"
+    "${app}_milters"
+    "${app}_mirror"
+    "${app}_webhook"
+    "${app}_worker"
+)
+for service in "${services[@]}"; do
+    if ynh_exec_warn_less yunohost service status "$service" >/dev/null; then
+        yunohost service remove "$service"
+    fi
+    ynh_remove_systemd_config --service="$service"
+done
 
 ynh_remove_uwsgi_service --service="$app"
-
-#=================================================
-# REMOVE THE POSTGRESQL DATABASE
-#=================================================
-ynh_script_progression --message="Removing the PostgreSQL database..."
-
-# Remove a database if it exists, along with the associated user
-ynh_psql_remove_db --db_user=$db_user --db_name=$db_name
-
-#=================================================
-# REMOVE APP MAIN DIR
-#=================================================
-ynh_script_progression --message="Removing app main directory..."
-
-# Remove the app directory securely
-ynh_secure_remove --file="$final_path"
-
-#=================================================
-# REMOVE DATA DIR
-#=================================================
-
-# Remove the data directory if --purge option is used
-if [ "${YNH_APP_PURGE:-0}" -eq 1 ]
-then
-	ynh_script_progression --message="Removing app data directory..."
-	ynh_secure_remove --file="$datadir"
-fi
-
-#=================================================
-# REMOVE NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Removing NGINX web server configuration..."
 
 # Remove the dedicated NGINX config
 ynh_remove_nginx_config
 
-#=================================================
-# REMOVE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Removing dependencies..."
-
-# Remove metapackage and its dependencies
-ynh_remove_app_dependencies
-
-#=================================================
-# SPECIFIC REMOVE
-#=================================================
-# REMOVE THE REDIS DATABASE
-#=================================================
-ynh_script_progression --message="Removing the redis database..."
-
 ynh_redis_remove_db "$redis_db"
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# REMOVE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Removing the dedicated system user..."
-
-# Delete a system user
-ynh_system_user_delete --username=$app
 
 #=================================================
 # END OF SCRIPT

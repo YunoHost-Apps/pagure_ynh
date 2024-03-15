@@ -7,8 +7,8 @@ Documentation=https://pagure.io/pagure
 Type=simple
 User=__APP__
 Group=__APP__
-WorkingDirectory=__FINALPATH__/
-ExecStart=__FINALPATH__/venv/bin/python3 __FINALPATH__/pagure-milters/comment_email_milter.py
+WorkingDirectory=__INSTALL_DIR__/
+ExecStart=__INSTALL_DIR__/venv/bin/python3 __INSTALL_DIR__/pagure-milters/comment_email_milter.py
 Restart=on-failure
 
 [Install]

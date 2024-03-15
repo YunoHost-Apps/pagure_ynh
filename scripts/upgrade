@@ -14,21 +14,21 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..."
+#REMOVEME? ynh_script_progression --message="Loading installation settings..."
 
-app=$YNH_APP_INSTANCE_NAME
+#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-path_url=$(ynh_app_setting_get --app=$app --key=path)
-admin=$(ynh_app_setting_get --app=$app --key=admin)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-db_name=$(ynh_app_setting_get --app=$app --key=db_name)
-db_user=$db_name
-db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
-datadir=$(ynh_app_setting_get --app=$app --key=datadir)
-redis_db=$(ynh_app_setting_get --app=$app --key=redis_db)
-secret_key=$(ynh_app_setting_get --app=$app --key=secret_key)
-salt_email=$(ynh_app_setting_get --app=$app --key=salt_email)
+#REMOVEME? domain=$(ynh_app_setting_get --app=$app --key=domain)
+#REMOVEME? path=$(ynh_app_setting_get --app=$app --key=path)
+#REMOVEME? admin=$(ynh_app_setting_get --app=$app --key=admin)
+#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
+#REMOVEME? db_name=$(ynh_app_setting_get --app=$app --key=db_name)
+#REMOVEME? db_user=$db_name
+#REMOVEME? db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
+#REMOVEME? data_dir=$(ynh_app_setting_get --app=$app --key=data_dir)
+#REMOVEME? redis_db=$(ynh_app_setting_get --app=$app --key=redis_db)
+#REMOVEME? secret_key=$(ynh_app_setting_get --app=$app --key=secret_key)
+#REMOVEME? salt_email=$(ynh_app_setting_get --app=$app --key=salt_email)
 
 #=================================================
 # CHECK VERSION
@@ -40,17 +40,17 @@ upgrade_type=$(ynh_check_app_version_changed)
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
+#REMOVEME? ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
 
 # Backup the current version of the app
-ynh_backup_before_upgrade
-ynh_clean_setup () {
+#REMOVEME? ynh_backup_before_upgrade
+#REMOVEME? ynh_clean_setup () {
 	ynh_clean_check_starting
 	# Restore it if the upgrade fails
-	ynh_restore_upgradebackup
+#REMOVEME? 	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+#REMOVEME? ynh_abort_if_errors
 
 #=================================================
 # STANDARD UPGRADE STEPS
@@ -77,8 +77,8 @@ ynh_systemd_action --service_name="uwsgi-app@$app.service" --action="stop" --log
 ynh_script_progression --message="Ensuring downward compatibility..."
 
 # Cleaning legacy permissions
-if ynh_legacy_permissions_exists; then
-	ynh_legacy_permissions_delete_all
+#REMOVEME? if ynh_legacy_permissions_exists; then
+#REMOVEME? 	ynh_legacy_permissions_delete_all
 
 	ynh_app_setting_delete --app=$app --key=is_public
 fi
@@ -86,10 +86,10 @@ fi
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..."
+#REMOVEME? ynh_script_progression --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir="$final_path"
+#REMOVEME? ynh_system_user_create --username=$app --home_dir="$install_dir"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -100,12 +100,12 @@ then
 	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path"
+	ynh_setup_source --dest_dir="$install_dir"
 fi
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
+chmod 750 "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R $app:www-data "$install_dir"
 
 #=================================================
 # NGINX CONFIGURATION
@@ -118,9 +118,9 @@ ynh_add_nginx_config
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Upgrading dependencies..."
+#REMOVEME? ynh_script_progression --message="Upgrading dependencies..."
 
-ynh_install_app_dependencies $pkg_dependencies
+#REMOVEME? ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -129,10 +129,10 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 ynh_script_progression --message="Updating a configuration file..."
 
-ynh_add_config --template="../conf/pagure.cfg.sample" --destination="$final_path/pagure.cfg"
+ynh_add_config --template="../conf/pagure.cfg.sample" --destination="$install_dir/pagure.cfg"
 
-chmod 400 "$final_path/pagure.cfg"
-chown $app:$app "$final_path/pagure.cfg"
+chmod 400 "$install_dir/pagure.cfg"
+chown $app:$app "$install_dir/pagure.cfg"
 
 #=================================================
 # SETUP SYSTEMD
@@ -151,7 +151,7 @@ ynh_add_systemd_config --service="${app}_mirror" --template="pagure_mirror.servi
 ynh_add_systemd_config --service="${app}_webhook" --template="pagure_webhook.service"
 ynh_add_systemd_config --service="${app}_worker" --template="pagure_worker.service"
 
-ynh_add_config --template="../conf/pagure.wsgi" --destination="$final_path/pagure.wsgi"
+ynh_add_config --template="../conf/pagure.wsgi" --destination="$install_dir/pagure.wsgi"
 ynh_add_uwsgi_service --service="$app" --template="uwsgi.ini"
 
 #=================================================
@@ -159,8 +159,8 @@ ynh_add_uwsgi_service --service="$app" --template="uwsgi.ini"
 #=================================================
 ynh_script_progression --message="Building app..."
 
-pushd "$final_path"
-	ynh_secure_remove --file="${final_path}/venv"
+pushd "$install_dir"
+	ynh_secure_remove --file="${install_dir}/venv"
 	python3 -m venv venv
 	source ./venv/bin/activate
 	pip install --upgrade pip
@@ -171,15 +171,15 @@ pushd "$final_path"
 	pip install pygit2
 	pip install "jinja2<3.1.0"
 	pip install -r requirements.txt
-	ynh_add_config --template="../conf/alembic.ini" --destination="$final_path/alembic.ini"
-	PAGURE_CONFIG=${final_path}/pagure.cfg alembic upgrade head 2>&1
+	ynh_add_config --template="../conf/alembic.ini" --destination="$install_dir/alembic.ini"
+	PAGURE_CONFIG=${install_dir}/pagure.cfg alembic upgrade head 2>&1
 popd
 
-ynh_replace_string --match_string="validators.Required" --replace_string="validators.DataRequired" --target_file="$final_path/pagure/forms.py"
+ynh_replace_string --match_string="validators.Required" --replace_string="validators.DataRequired" --target_file="$install_dir/pagure/forms.py"
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
+chmod 750 "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R $app:www-data "$install_dir"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -219,9 +219,9 @@ ynh_systemd_action --service_name="uwsgi-app@$app.service" --action="start" --lo
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
+#REMOVEME? ynh_script_progression --message="Reloading NGINX web server..."
 
-ynh_systemd_action --service_name=nginx --action=reload
+#REMOVEME? ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT
