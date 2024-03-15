@@ -98,7 +98,7 @@ for service in "${services[@]}"; do
     ynh_systemd_action --service_name="${app}_${service}" --action="start" --log_path="systemd" --line_match="ready"
 done
 
-ynh_systemd_action --service_name="uwsgi-app@$app.service" --action="start" --log_path="systemd" --line_match="Started"
+ynh_systemd_action --service_name="uwsgi-app@$app.service" --action="start" --log_path="systemd"
 
 #=================================================
 # END OF SCRIPT
