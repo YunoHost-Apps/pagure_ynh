@@ -46,32 +46,12 @@ chmod 400 "$install_dir/pagure.cfg"
 chown "$app:$app" "$install_dir/pagure.cfg"
 
 #=================================================
-# SETUP SYSTEMD
-#=================================================
-ynh_script_progression --message="Configuring a systemd service..."
-
-# Create a dedicated systemd config
-ynh_add_systemd_config --service="${app}_authorized_keys_worker" --template="pagure_authorized_keys_worker.service"
-ynh_add_systemd_config --service="${app}_ci" --template="pagure_ci.service"
-# ynh_add_systemd_config --service="${app}_ev_server" --template="pagure_ev_server.service"
-ynh_add_systemd_config --service="${app}_gitolite_worker" --template="pagure_gitolite_worker.service"
-ynh_add_systemd_config --service="${app}_loadjson" --template="pagure_loadjson.service"
-ynh_add_systemd_config --service="${app}_logcom" --template="pagure_logcom.service"
-# ynh_add_systemd_config --service="${app}_milters" --template="pagure_milters.service"
-ynh_add_systemd_config --service="${app}_mirror" --template="pagure_mirror.service"
-ynh_add_systemd_config --service="${app}_webhook" --template="pagure_webhook.service"
-ynh_add_systemd_config --service="${app}_worker" --template="pagure_worker.service"
-
-ynh_add_config --template="pagure.wsgi" --destination="$install_dir/pagure.wsgi"
-ynh_add_uwsgi_service --service="$app" --template="uwsgi.ini"
-
-#=================================================
 # BUILD APP
 #=================================================
 ynh_script_progression --message="Building app..."
 
 pushd "$install_dir"
-    python3 -m venv venv
+    ynh_exec_as "$app" python3 -m venv venv
     ynh_exec_as "$app" "$install_dir/venv/bin/python3" -m pip install --upgrade pip
     ynh_exec_as "$app" "$install_dir/venv/bin/python3" -m pip install wheel
     ynh_exec_as "$app" "$install_dir/venv/bin/python3" -m pip install cffi
@@ -98,16 +78,15 @@ ynh_script_progression --message="Adding system configurations related to $app..
 # Create a dedicated NGINX config
 ynh_add_nginx_config
 
-yunohost service add "${app}_authorized_keys_worker"
-yunohost service add "${app}_ci"
-#yunohost service add "${app}_ev_server"
-yunohost service add "${app}_gitolite_worker"
-yunohost service add "${app}_loadjson"
-yunohost service add "${app}_logcom"
-#yunohost service add "${app}_milters"
-yunohost service add "${app}_mirror"
-yunohost service add "${app}_webhook"
-yunohost service add "${app}_worker"
+# Create a dedicated systemd config
+for service in "${services[@]}"; do
+    ynh_add_systemd_config --service="${app}_${service}" --template="pagure_${service}.service"
+    yunohost service add "${app}_${service}"
+done
+
+ynh_add_config --template="pagure.wsgi" --destination="$install_dir/pagure.wsgi"
+ynh_add_uwsgi_service --service="$app" --template="uwsgi.ini"
+yunohost service add "uwsgi-app@$app"
 
 #=================================================
 # START SYSTEMD SERVICE
@@ -115,16 +94,9 @@ yunohost service add "${app}_worker"
 ynh_script_progression --message="Starting a systemd service..."
 
 # Start a systemd service
-ynh_systemd_action --service_name="${app}_authorized_keys_worker" --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name="${app}_ci" --action="start" --log_path="systemd" --line_match="ready"
-#ynh_systemd_action --service_name="${app}_ev_server" --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name="${app}_gitolite_worker" --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name="${app}_loadjson" --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name="${app}_logcom" --action="start" --log_path="systemd" --line_match="ready"
-#ynh_systemd_action --service_name="${app}_milters" --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name="${app}_mirror" --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name="${app}_webhook" --action="start" --log_path="systemd" --line_match="ready"
-ynh_systemd_action --service_name="${app}_worker" --action="start" --log_path="systemd" --line_match="ready"
+for service in "${services[@]}"; do
+    ynh_systemd_action --service_name="${app}_${service}" --action="start" --log_path="systemd" --line_match="ready"
+done
 
 ynh_systemd_action --service_name="uwsgi-app@$app.service" --action="start" --log_path="systemd" --line_match="Started"
 

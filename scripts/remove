@@ -14,23 +14,11 @@ source /usr/share/yunohost/helpers
 #=================================================
 ynh_script_progression --message="Removing system configurations related to $app..." --weight=1
 
-services=(
-    "${app}_authorized_keys_worker"
-    "${app}_ci"
-    "${app}_ev_server"
-    "${app}_gitolite_worker"
-    "${app}_loadjson"
-    "${app}_logcom"
-    "${app}_milters"
-    "${app}_mirror"
-    "${app}_webhook"
-    "${app}_worker"
-)
 for service in "${services[@]}"; do
-    if ynh_exec_warn_less yunohost service status "$service" >/dev/null; then
-        yunohost service remove "$service"
+    if ynh_exec_warn_less yunohost service status "${app}_${service}" >/dev/null; then
+        yunohost service remove "${app}_${service}"
     fi
-    ynh_remove_systemd_config --service="$service"
+    ynh_remove_systemd_config --service="${app}_${service}"
 done
 
 ynh_remove_uwsgi_service --service="$app"
