@@ -74,7 +74,7 @@ ram.runtime = "50M" # FIXME: replace with an **estimate** minimum ram requiremen
         "python3-venv",
         "python3",
         "redis-server",
-        "uwsgi-plugin-python",
+        "uwsgi-plugin-python3",
         "uwsgi",
         "virtualenv",
 
