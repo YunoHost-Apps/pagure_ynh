@@ -19,7 +19,7 @@ code = "https://pagure.io/pagure"
 cpe = "cpe:2.3:a:redhat:pagure"
 
 [integration]
-yunohost = ">= 11.2"
+yunohost = ">= 11.2.12"
 architectures = "all"
 multi_instance = false
 ldap = "?" # FIXME: replace with true, false, or "not_relevant". Not to confuse with the "sso" key : the "ldap" key corresponds to wether or not a user *can* login on the app using its YunoHost credentials.
